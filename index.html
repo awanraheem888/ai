@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurboVPN - High Speed VPN with Speed Test</title>
+    <style>
+        :root {
+            --primary: #6d28d9;
+            --primary-dark: #5b21b6;
+            --secondary: #10b981;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #94a3b8;
+            --dark-gray: #1e293b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            line-height: 1.6;
+            background-image: radial-gradient(circle at 10% 20%, rgba(109, 40, 217, 0.1) 0%, rgba(109, 40, 217, 0) 50%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(90deg, var(--primary), #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo::before {
+            content: "⚡";
+            margin-right: 8px;
+            font-size: 32px;
+        }
+        
+        nav a {
+            color: var(--gray);
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        nav a:hover {
+            color: var(--light);
+        }
+        
+        nav a:hover::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), #8b5cf6);
+            border-radius: 2px;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 80px 0 40px;
+        }
+        
+        .hero h1 {
+            font-size: 52px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--light), #c7d2fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.2;
+        }
+        
+        .hero h1 span {
+            color: var(--secondary);
+            background: none;
+            -webkit-background-clip: initial;
+            background-clip: initial;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+        
+        .speed-meter {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .speed-value {
+            font-size: 48px;
+            font-weight: bold;
+            background: linear-gradient(90deg, var(--secondary), #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-right: 10px;
+        }
+        
+        .speed-unit {
+            font-size: 24px;
+            color: var(--gray);
+        }
+        
+        .vpn-box {
+            background-color: var(--dark-gray);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 700px;
+            margin: 0 auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .vpn-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(109, 40, 217, 0.1) 0%, rgba(109, 40, 217, 0) 70%);
+            z-index: 0;
+        }
+        
+        .vpn-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ef4444;
+            margin-right: 10px;
+            box-shadow: 0 0 10px #ef4444;
+        }
+        
+        .status.connected .status-indicator {
+            background-color: var(--secondary);
+            box-shadow: 0 0 10px var(--secondary);
+        }
+        
+        .server-select {
+            width: 100%;
+            padding: 15px;
+            background-color: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 8px;
+            color: var(--light);
+            margin-bottom: 25px;
+            font-size: 16px;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s;
+        }
+        
+        .server-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(109, 40, 217, 0.3);
+        }
+        
+        .server-option {
+            background-color: var(--dark-gray);
+            padding: 10px;
+        }
+        
+        .connect-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .connect-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+        
+        .connect-btn:hover::before {
+            opacity: 1;
+        }
+        
+        .connect-btn:active {
+            transform: translateY(2px);
+        }
+        
+        .connect-btn.connected {
+            background: linear-gradient(90deg, var(--secondary), #059669);
+        }
+        
+        .connect-btn.connected::before {
+            background: linear-gradient(90deg, #059669, var(--secondary));
+        }
+        
+        .server-features {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .server-feature {
+            display: flex;
+            align-items: center;
+        }
+        
+        .server-feature i {
+            margin-right: 5px;
+            color: var(--secondary);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 80px 0;
+        }
+        
+        .feature-card {
+            background-color: var(--dark-gray);
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            border-color: rgba(109, 40, 217, 0.3);
+        }
+        
+        .feature-card h3 {
+            margin-bottom: 15px;
+            color: var(--light);
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-card h3 i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+        
+        .feature-card p {
+            color: var(--gray);
+        }
+        
+        .unlimited-banner {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 40px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .unlimited-banner i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        .tool-box {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .tool-btn {
+            padding: 12px 25px;
+            background-color: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(109, 40, 217, 0.3);
+            border-radius: 8px;
+            color: var(--light);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .tool-btn i {
+            margin-right: 8px;
+        }
+        
+        .tool-btn:hover {
+            background-color: rgba(109, 40, 217, 0.2);
+            border-color: rgba(109, 40, 217, 0.5);
+        }
+        
+        .tool-panel {
+            background-color: var(--dark-gray);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 700px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            display: none;
+        }
+        
+        .tool-panel.active {
+            display: block;
+        }
+        
+        .ip-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .ip-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .ip-label {
+            color: var(--gray);
+        }
+        
+        .ip-value {
+            font-weight: 500;
+        }
+        
+        .speed-test-container {
+            text-align: center;
+        }
+        
+        .speed-test-gauge {
+            width: 100%;
+            height: 20px;
+            background-color: rgba(30, 41, 59, 0.7);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .speed-test-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .speed-test-results {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+        
+        .speed-test-result {
+            text-align: center;
+        }
+        
+        .speed-test-value {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(90deg, var(--secondary), #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 5px;
+        }
+        
+        .speed-test-label {
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .start-test-btn {
+            padding: 12px 30px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .start-test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(109, 40, 217, 0.3);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 50px 0 30px;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+            color: var(--gray);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .footer-links a {
+            color: var(--gray);
+            text-decoration: none;
+            margin: 0 15px;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--light);
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .hero p {
+                font-size: 18px;
+            }
+            
+            nav {
+                display: none;
+            }
+            
+            .speed-value {
+                font-size: 36px;
+            }
+            
+            .tool-box {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tool-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">TurboVPN</div>
+            <nav>
+                <a href="#">Home</a>
+                <a href="#">Servers</a>
+                <a href="#">Features</a>
+                <a href="#">Pricing</a>
+                <a href="#">Support</a>
+            </nav>
+        </header>
+        
+        <main>
+            <section class="hero">
+                <h1>Unlimited <span>High-Speed</span> VPN</h1>
+                <p>Experience blazing-fast connections with no bandwidth limits. Stream, download, and browse without restrictions.</p>
+                
+                <div class="speed-meter">
+                    <div class="speed-value">1.2 Gbps</div>
+                    <div class="speed-unit">MAX SPEED</div>
+                </div>
+                
+                <div class="unlimited-banner">
+                    <i class="fas fa-infinity"></i>
+                    <span>UNLIMITED BANDWIDTH • NO SPEED THROTTLING • NO DATA CAPS</span>
+                </div>
+                
+                <div class="vpn-box">
+                    <div class="vpn-content">
+                        <div class="status">
+                            <div class="status-indicator"></div>
+                            <span>Disconnected</span>
+                        </div>
+                        
+                        <select class="server-select" id="server-select">
+                            <option value="" disabled selected>Select High-Speed Server Location</option>
+                            <option value="us-ny">🇺🇸 United States - New York (1.2 Gbps)</option>
+                            <option value="uk-lon">🇬🇧 United Kingdom - London (1.1 Gbps)</option>
+                            <option value="jp-tok">🇯🇵 Japan - Tokyo (1.3 Gbps)</option>
+                            <option value="sg">🇸🇬 Singapore (1.4 Gbps)</option>
+                            <option value="de-fra">🇩🇪 Germany - Frankfurt (1.1 Gbps)</option>
+                            <option value="ca-tor">🇨🇦 Canada - Toronto (1.0 Gbps)</option>
+                            <option value="fr-par">🇫🇷 France - Paris (1.2 Gbps)</option>
+                            <option value="au-syd">🇦🇺 Australia - Sydney (1.1 Gbps)</option>
+                            <option value="br-sao">🇧🇷 Brazil - São Paulo (950 Mbps)</option>
+                            <option value="in-mum">🇮🇳 India - Mumbai (900 Mbps)</option>
+                        </select>
+                        
+                        <button class="connect-btn" id="connect-btn">
+                            <i class="fas fa-bolt"></i> Connect Now
+                        </button>
+                        
+                        <div class="server-features">
+                            <div class="server-feature">
+                                <i class="fas fa-tachometer-alt"></i> Unlimited Speed
+                            </div>
+                            <div class="server-feature">
+                                <i class="fas fa-shield-alt"></i> Military Encryption
+                            </div>
+                            <div class="server-feature">
+                                <i class="fas fa-infinity"></i> No Bandwidth Limits
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tool-box">
+                    <button class="tool-btn" id="ip-check-btn">
+                        <i class="fas fa-network-wired"></i> Check My IP
+                    </button>
+                    <button class="tool-btn" id="speed-test-btn">
+                        <i class="fas fa-tachometer-alt"></i> Speed Test
+                    </button>
+                </div>
+                
+                <div class="tool-panel" id="ip-check-panel">
+                    <h3><i class="fas fa-network-wired"></i> Your IP Information</h3>
+                    <div class="ip-info">
+                        <div class="ip-row">
+                            <span class="ip-label">IP Address:</span>
+                            <span class="ip-value" id="ip-address">Loading...</span>
+                        </div>
+                        <div class="ip-row">
+                            <span class="ip-label">Location:</span>
+                            <span class="ip-value" id="ip-location">Loading...</span>
+                        </div>
+                        <div class="ip-row">
+                            <span class="ip-label">ISP:</span>
+                            <span class="ip-value" id="ip-isp">Loading...</span>
+                        </div>
+                        <div class="ip-row">
+                            <span class="ip-label">Country:</span>
+                            <span class="ip-value" id="ip-country">Loading...</span>
+                        </div>
+                        <div class="ip-row">
+                            <span class="ip-label">VPN Status:</span>
+                            <span class="ip-value" id="ip-vpn-status">Not connected</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tool-panel" id="speed-test-panel">
+                    <h3><i class="fas fa-tachometer-alt"></i> Speed Test</h3>
+                    <div class="speed-test-container">
+                        <p>Test your current connection speed (download, upload, ping)</p>
+                        <div class="speed-test-gauge">
+                            <div class="speed-test-progress" id="speed-test-progress"></div>
+                        </div>
+                        <button class="start-test-btn" id="start-test-btn">
+                            Start Speed Test
+                        </button>
+                        <div class="speed-test-results">
+                            <div class="speed-test-result">
+                                <div class="speed-test-value" id="download-speed">0 Mbps</div>
+                                <div class="speed-test-label">Download</div>
+                            </div>
+                            <div class="speed-test-result">
+                                <div class="speed-test-value" id="upload-speed">0 Mbps</div>
+                                <div class="speed-test-label">Upload</div>
+                            </div>
+                            <div class="speed-test-result">
+                                <div class="speed-test-value" id="ping-value">0 ms</div>
+                                <div class="speed-test-label">Ping</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="features">
+                <div class="feature-card">
+                    <h3><i class="fas fa-rocket"></i> Ultra-Fast Speeds</h3>
+                    <p>Our premium network delivers speeds up to 1.5 Gbps with low latency for seamless streaming and gaming.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3><i class="fas fa-globe"></i> Global Server Network</h3>
+                    <p>Access content from anywhere with our optimized servers in 50+ countries with unlimited bandwidth.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3><i class="fas fa-lock"></i> Zero-Log Policy</h3>
+                    <p>We never track, store, or share your online activity. Your privacy is 100% protected.</p>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Refund Policy</a>
+                <a href="#">Contact Us</a>
+            </div>
+            <p>&copy; 2023 TurboVPN. All rights reserved.</p>
+        </footer>
+    </div>
+    
+    <script>
+        // VPN Connection Functionality
+        const connectBtn = document.getElementById('connect-btn');
+        const serverSelect = document.getElementById('server-select');
+        const statusDiv = document.querySelector('.status');
+        const speedValue = document.querySelector('.speed-value');
+        
+        // Tool Panel Functionality
+        const ipCheckBtn = document.getElementById('ip-check-btn');
+        const speedTestBtn = document.getElementById('speed-test-btn');
+        const ipCheckPanel = document.getElementById('ip-check-panel');
+        const speedTestPanel = document.getElementById('speed-test-panel');
+        
+        // Simulate different speed values for different servers
+        const serverSpeeds = {
+            'us-ny': '1.2 Gbps',
+            'uk-lon': '1.1 Gbps',
+            'jp-tok': '1.3 Gbps',
+            'sg': '1.4 Gbps',
+            'de-fra': '1.1 Gbps',
+            'ca-tor': '1.0 Gbps',
+            'fr-par': '1.2 Gbps',
+            'au-syd': '1.1 Gbps',
+            'br-sao': '950 Mbps',
+            'in-mum': '900 Mbps'
+        };
+        
+        // IP Information Simulation
+        const ipInfo = {
+            ip: '192.168.1.1',
+            location: 'New York, US',
+            isp: 'Comcast Cable',
+            country: 'United States',
+            vpnStatus: 'Not connected'
+        };
+        
+        // Initialize tool panels
+        ipCheckBtn.addEventListener('click', function() {
+            speedTestPanel.classList.remove('active');
+            ipCheckPanel.classList.toggle('active');
+            
+            if (ipCheckPanel.classList.contains('active')) {
+                // Simulate fetching IP information
+                setTimeout(() => {
+                    document.getElementById('ip-address').textContent = ipInfo.ip;
+                    document.getElementById('ip-location').textContent = ipInfo.location;
+                    document.getElementById('ip-isp').textContent = ipInfo.isp;
+                    document.getElementById('ip-country').textContent = ipInfo.country;
+                    document.getElementById('ip-vpn-status').textContent = ipInfo.vpnStatus;
+                }, 500);
+            }
+        });
+        
+        speedTestBtn.addEventListener('click', function() {
+            ipCheckPanel.classList.remove('active');
+            speedTestPanel.classList.toggle('active');
+            
+            // Reset speed test results when panel is opened
+            if (speedTestPanel.classList.contains('active')) {
+                document.getElementById('download-speed').textContent = '0 Mbps';
+                document.getElementById('upload-speed').textContent = '0 Mbps';
+                document.getElementById('ping-value').textContent = '0 ms';
+                document.getElementById('speed-test-progress').style.width = '0%';
+            }
+        });
+        
+        // Speed Test Functionality
+        document.getElementById('start-test-btn').addEventListener('click', function() {
+            const btn = this;
+            const progressBar = document.getElementById('speed-test-progress');
+            const downloadSpeed = document.getElementById('download-speed');
+            const uploadSpeed = document.getElementById('upload-speed');
+            const pingValue = document.getElementById('ping-value');
+            
+            btn.disabled = true;
+            btn.textContent = 'Testing...';
+            
+            // Simulate ping test
+            setTimeout(() => {
+                pingValue.textContent = Math.floor(Math.random() * 50) + 10 + ' ms';
+                progressBar.style.width = '20%';
+            }, 1000);
+            
+            // Simulate download test
+            setTimeout(() => {
+                let progress = 20;
+                const downloadInterval = setInterval(() => {
+                    progress += 2;
+                    progressBar.style.width = progress + '%';
+                    
+                    if (progress >= 60) {
+                        clearInterval(downloadInterval);
+                        const speed = (Math.random() * 300 + 50).toFixed(1);
+                        downloadSpeed.textContent = speed + ' Mbps';
+                        progressBar.style.width = '60%';
+                        
+                        // Simulate upload test
+                        setTimeout(() => {
+                            let uploadProgress = 60;
+                            const uploadInterval = setInterval(() => {
+                                uploadProgress += 2;
+                                progressBar.style.width = uploadProgress + '%';
+                                
+                                if (uploadProgress >= 100) {
+                                    clearInterval(uploadInterval);
+                                    const upSpeed = (Math.random() * 100 + 20).toFixed(1);
+                                    uploadSpeed.textContent = upSpeed + ' Mbps';
+                                    progressBar.style.width = '100%';
+                                    btn.disabled = false;
+                                    btn.textContent = 'Test Again';
+                                }
+                            }, 50);
+                        }, 500);
+                    }
+                }, 50);
+            }, 1500);
+        });
+        
+        // VPN Connection Simulation
+        serverSelect.addEventListener('change', function() {
+            const selectedServer = this.value;
+            if (selectedServer && serverSpeeds[selectedServer]) {
+                speedValue.textContent = serverSpeeds[selectedServer];
+            }
+        });
+        
+        connectBtn.addEventListener('click', function() {
+            const selectedServer = serverSelect.value;
+            
+            if (!selectedServer) {
+                alert('Please select a high-speed server location first');
+                return;
+            }
+            
+            if (connectBtn.textContent.includes('Connect')) {
+                // Simulate connection process
+                connectBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Connecting...';
+                connectBtn.disabled = true;
+                
+                setTimeout(() => {
+                    connectBtn.innerHTML = '<i class="fas fa-plug"></i> Disconnect';
+                    connectBtn.classList.add('connected');
+                    statusDiv.classList.add('connected');
+                    statusDiv.querySelector('span').textContent = 'Connected to ' + 
+                        serverSelect.options[serverSelect.selectedIndex].text.split('(')[0].trim();
+                    connectBtn.disabled = false;
+                    
+                    // Update IP info to show VPN connection
+                    ipInfo.ip = '185.159.157.' + Math.floor(Math.random() * 255);
+                    ipInfo.location = serverSelect.options[serverSelect.selectedIndex].text.split('(')[0].trim();
+                    ipInfo.country = serverSelect.options[serverSelect.selectedIndex].text.split('(')[0].trim().split('-')[0].trim();
+                    ipInfo.vpnStatus = 'Connected to ' + serverSelect.options[serverSelect.selectedIndex].text.split('(')[0].trim();
+                    
+                    // Simulate speed test after connection
+                    simulateSpeedTest();
+                }, 2000);
+            } else {
+                // Simulate disconnection process
+                connectBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Disconnecting...';
+                connectBtn.disabled = true;
+                
+                setTimeout(() => {
+                    connectBtn.innerHTML = '<i class="fas fa-bolt"></i> Connect Now';
+                    connectBtn.classList.remove('connected');
+                    statusDiv.classList.remove('connected');
+                    statusDiv.querySelector('span').textContent = 'Disconnected';
+                    connectBtn.disabled = false;
+                    speedValue.textContent = serverSpeeds[selectedServer];
+                    
+                    // Reset IP info to original
+                    ipInfo.ip = '192.168.1.1';
+                    ipInfo.location = 'New York, US';
+                    ipInfo.country = 'United States';
+                    ipInfo.vpnStatus = 'Not connected';
+                }, 1000);
+            }
+        });
+        
+        function simulateSpeedTest() {
+            const baseSpeed = serverSpeeds[serverSelect.value];
+            const baseValue = parseFloat(baseSpeed.split(' ')[0]);
+            const unit = baseSpeed.split(' ')[1];
+            
+            let current = 0;
+            const interval = setInterval(() => {
+                if (current < baseValue) {
+                    current += baseValue / 10;
+                    speedValue.textContent = current.toFixed(1) + ' ' + unit;
+                } else {
+                    clearInterval(interval);
+                    speedValue.textContent = baseSpeed;
+                }
+            }, 100);
+        }
+    </script>
+</body>
+</html>
